@@ -2,10 +2,10 @@ import { StyleSheet, StatusBar, Alert, Platform, Dimensions } from 'react-native
 import ModelManager from "@Lib/sfjs/modelManager"
 import Server from "@Lib/sfjs/httpManager"
 import Sync from '@Lib/sfjs/syncManager'
-import { SFItemParams } from 'standard-file-js';
+import RNProtocolManager from '@SNJS/protocolManager';
 import Storage from "@Lib/sfjs/storageManager"
 import Auth from "@Lib/sfjs/authManager"
-import KeysManager from '@Lib/keysManager'
+import KeyManager from '@Lib/snjs/keyManager'
 import CSSParser from "@Style/Util/CSSParser";
 import ThemeDownloader from "@Style/Util/ThemeDownloader"
 import IconChanger from 'react-native-alternate-icons';
@@ -32,7 +32,7 @@ export default class StyleKit {
 
     this.createDefaultThemes();
 
-    KeysManager.get().registerAccountRelatedStorageKeys(["savedTheme"]);
+    KeyManager.get().registerAccountRelatedStorageKeys(["savedTheme"]);
 
     ModelManager.get().addItemSyncObserver("themes", "SN|Theme", (allItems, validItems, deletedItems, source) => {
       if(this.activeTheme && this.activeTheme.isSwapIn) {
@@ -279,9 +279,11 @@ export default class StyleKit {
         Storage.get().setItem("savedSystemThemeId", theme.uuid);
         Storage.get().removeItem("savedTheme");
       } else if(writeToStorage) {
-        let transformer = new SFItemParams(theme);
-        let params = await transformer.paramsForLocalStorage();
-        Storage.get().setItem("savedTheme", JSON.stringify(params));
+        const itemParams = await RNProtocolManager.get().generateExportParameters({
+          item: theme,
+          exportType: SNProtocolOperator.ExportTypeLocalStorage
+        })
+        Storage.get().setItem("savedTheme", JSON.stringify(itemParams));
         Storage.get().removeItem("savedSystemThemeId");
       }
     }

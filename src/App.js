@@ -3,13 +3,13 @@ import { View, Text } from "react-native";
 import { Client } from 'bugsnag-react-native';
 import { createStackNavigator, createAppContainer, createDrawerNavigator, DrawerActions, NavigationActions } from "react-navigation";
 
-import KeysManager from './lib/keysManager'
+import KeyManager from './lib/KeyManager'
 import StyleKit from "./style/StyleKit"
 import ApplicationState from "@Lib/ApplicationState"
 import Auth from './lib/sfjs/authManager'
 import ModelManager from './lib/sfjs/modelManager'
-import PrivilegesManager from '@SFJS/privilegesManager'
-import MigrationManager from "@SFJS/migrationManager"
+import PrivilegesManager from '@SNJS/privilegesManager'
+import MigrationManager from "@SNJS/migrationManager"
 import Sync from './lib/sfjs/syncManager'
 import Storage from './lib/sfjs/storageManager'
 import ReviewManager from './lib/reviewManager'
@@ -145,7 +145,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
 
-    KeysManager.get().registerAccountRelatedStorageKeys(["options"]);
+    KeyManager.get().registerAccountRelatedStorageKeys(["options"]);
 
     // Initialize iOS review manager. Will automatically handle requesting review logic.
     ReviewManager.initialize();
@@ -176,16 +176,16 @@ export default class App extends Component {
 
   async loadInitialData() {
     await StyleKit.get().resolveInitialTheme();
-    await KeysManager.get().loadInitialData();
+    await KeyManager.get().loadInitialData();
 
     let ready = () => {
-      KeysManager.get().markApplicationAsRan();
+      KeyManager.get().markApplicationAsRan();
       ApplicationState.get().receiveApplicationStartEvent();
       this.setState({ready: true});
     }
 
-    if(await KeysManager.get().needsWipe()) {
-      KeysManager.get().wipeData().then(ready).catch(ready);
+    if(await KeyManager.get().needsWipe()) {
+      KeyManager.get().wipeData().then(ready).catch(ready);
     } else {
       ready();
     }

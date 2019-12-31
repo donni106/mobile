@@ -1,11 +1,11 @@
 import {AppState, Platform, NativeModules, Linking, Alert, Keyboard } from 'react-native'
 const { PlatformConstants } = NativeModules;
-import KeysManager from "@Lib/keysManager"
+import KeyManager from "@Lib/snjs/keyManager"
 import OptionsState from "@Lib/OptionsState"
 import AuthenticationSourceLocalPasscode from "@Screens/Authentication/Sources/AuthenticationSourceLocalPasscode";
 import AuthenticationSourceBiometric from "@Screens/Authentication/Sources/AuthenticationSourceBiometric";
 var pjson = require('../../package.json')
-import PrivilegesManager from "@SFJS/privilegesManager";
+import PrivilegesManager from "@SNJS/privilegesManager";
 
 export default class ApplicationState {
 
@@ -311,8 +311,8 @@ export default class ApplicationState {
   }
 
   shouldLockApplication() {
-    var showPasscode = KeysManager.get().hasOfflinePasscode() && KeysManager.get().passcodeTiming == "immediately";
-    var showBiometrics = KeysManager.get().hasBiometrics() && KeysManager.get().biometricPrefs.timing == "immediately";
+    var showPasscode = KeyManager.get().hasOfflinePasscode() && KeyManager.get().passcodeTiming == "immediately";
+    var showBiometrics = KeyManager.get().hasBiometrics() && KeyManager.get().biometricPrefs.timing == "immediately";
     return showPasscode || showBiometrics;
   }
 
@@ -324,7 +324,7 @@ export default class ApplicationState {
   unlockApplication() {
     this.notifyOfState(ApplicationState.Unlocking);
     this.setAuthenticationInProgress(false);
-    KeysManager.get().updateScreenshotPrivacy();
+    KeyManager.get().updateScreenshotPrivacy();
     this.locked = false;
   }
 
@@ -352,8 +352,8 @@ export default class ApplicationState {
       return {sources: []};
     }
 
-    var hasPasscode = KeysManager.get().hasOfflinePasscode();
-    var hasBiometrics = KeysManager.get().hasBiometrics();
+    var hasPasscode = KeyManager.get().hasOfflinePasscode();
+    var hasBiometrics = KeyManager.get().hasBiometrics();
 
     var showPasscode = hasPasscode, showBiometrics = hasBiometrics;
 
@@ -362,8 +362,8 @@ export default class ApplicationState {
       state == ApplicationState.ResumingFromBackground ||
       state == ApplicationState.LosingFocus
     ) {
-      showPasscode = hasPasscode && KeysManager.get().passcodeTiming == "immediately";
-      showBiometrics = hasBiometrics && KeysManager.get().biometricPrefs.timing == "immediately";
+      showPasscode = hasPasscode && KeyManager.get().passcodeTiming == "immediately";
+      showBiometrics = hasBiometrics && KeyManager.get().biometricPrefs.timing == "immediately";
     }
 
     var title = showPasscode && showBiometrics ? "Authentication Required" : (showPasscode ? "Passcode Required" : "Fingerprint Required");

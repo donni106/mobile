@@ -1,6 +1,6 @@
-import SF from '@SFJS/sfjs'
-import Storage from '@SFJS/storageManager'
-import KeysManager from '@Lib/keysManager'
+import RNProtocolManager from '@SNJS/protocolManager'
+import Storage from '@SNJS/storageManager'
+import KeyManager from '@Lib/snjs/keyManager'
 import AuthenticationSource from "./AuthenticationSource"
 import StyleKit from "@Style/StyleKit"
 
@@ -73,10 +73,13 @@ export default class AuthenticationSourceLocalPasscode extends AuthenticationSou
 
   async authenticate() {
     this.didBegin();
-    var authParams = KeysManager.get().offlineAuthParams;
-    let keys = await SF.get().crypto.computeEncryptionKeysForUser(this.authenticationValue, authParams);
-    if(keys.pw === KeysManager.get().offlinePasscodeHash()) {
-      await KeysManager.get().setOfflineKeys(keys);
+    var authParams = KeyManager.get().offlineAuthParams;
+    let keys = await RNProtocolManager.get().computeRootKey({
+      password: this.authenticationValue,
+      authParams: authParams
+    });
+    if(keys.serverAuthenticationValue === KeyManager.get().offlinePasscodeHash()) {
+      await KeyManager.get().setOfflineKeys(keys);
       return this._success();
     } else {
       return this._fail("Invalid local passcode. Please try again.");

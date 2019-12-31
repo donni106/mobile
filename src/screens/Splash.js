@@ -3,7 +3,7 @@ import { View, Text, KeyboardAvoidingView, SafeAreaView, ScrollView, Image, Back
 import StyleKit from "@Style/StyleKit"
 import Abstract from "@Screens/Abstract"
 import ApplicationState from "@Lib/ApplicationState"
-import AlertManager from "@SFJS/alertManager"
+import AlertManager from "@SNJS/alertManager"
 import AuthSection from "@Screens/Settings/Sections/AuthSection"
 
 export default class Splash extends Abstract {

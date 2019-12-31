@@ -2,10 +2,10 @@ import React, { Component, Fragment } from 'react';
 import { ScrollView, View, Text, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import Sync from '@SFJS/syncManager'
+import Sync from '@SNJS/syncManager'
 import ItemActionManager from '@Lib/itemActionManager'
-import ModelManager from '@SFJS/modelManager'
-import Auth from "@SFJS/authManager"
+import ModelManager from '@SNJS/modelManager'
+import Auth from "@SNJS/authManager"
 
 import StyleKit from "@Style/StyleKit"
 import SideMenuCell from "@SideMenu/SideMenuCell"

@@ -1,9 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import {TextInput, View, Text, Keyboard, Alert} from 'react-native';
 import StyleKit from "@Style/StyleKit"
-import Sync from '@SFJS/syncManager'
-import SF from '@SFJS/sfjs'
-import Auth from '@SFJS/authManager'
+import Sync from '@SNJS/syncManager'
+import RNProtocolManager from '@SNJS/protocolManager'
+import Auth from '@SNJS/authManager'
 
 import SectionHeader from "@Components/SectionHeader";
 import ButtonCell from "@Components/ButtonCell";

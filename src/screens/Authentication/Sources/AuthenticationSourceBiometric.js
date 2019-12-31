@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import FingerprintScanner from 'react-native-fingerprint-scanner'
 import AuthenticationSource from "./AuthenticationSource"
-import KeysManager from "@Lib/keysManager"
+import KeyManager from "@Lib/snjs/keyManager"
 
 export default class AuthenticationSourceBiometric extends AuthenticationSource {
   constructor() {
@@ -11,7 +11,7 @@ export default class AuthenticationSourceBiometric extends AuthenticationSource 
   initializeForInterface() {
     super.initializeForInterface();
 
-    KeysManager.getDeviceBiometricsAvailability((available, type, noun) => {
+    KeyManager.getDeviceBiometricsAvailability((available, type, noun) => {
       this.biometricsType = type;
       this.biometricsNoun = noun;
       this.requiresInterfaceReload();

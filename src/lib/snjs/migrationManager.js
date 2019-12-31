@@ -1,8 +1,8 @@
-import ModelManager from "@SFJS/modelManager";
-import Sync from "@SFJS/syncManager";
-import Storage from "@SFJS/storageManager";
-import Auth from "@SFJS/authManager";
-import PrivilegesManager from "@SFJS/privilegesManager"
+import ModelManager from "@SNJS/modelManager";
+import Sync from "@SNJS/syncManager";
+import Storage from "@SNJS/storageManager";
+import Auth from "@SNJS/authManager";
+import PrivilegesManager from "@SNJS/privilegesManager"
 var base64 = require('base-64');
 
 export default class MigrationManager extends SFMigrationManager {

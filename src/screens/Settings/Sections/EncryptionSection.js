@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import StyleKit from "@Style/StyleKit"
 import {Text, View} from 'react-native';
-import KeysManager from "@Lib/keysManager"
+import KeyManager from "@Lib/snjs/keyManager"
 import ModelManager from "@Lib/sfjs/modelManager"
 
 import SectionHeader from "@Components/SectionHeader";
@@ -21,10 +21,10 @@ export default class PasscodeSection extends Component {
   }
 
   render() {
-    var source = KeysManager.get().encryptionSource();
+    var source = KeyManager.get().encryptionSource();
     var enabled = source !== null;
     if(source == "offline") {
-      enabled = KeysManager.get().isStorageEncryptionEnabled();
+      enabled = KeyManager.get().isStorageEncryptionEnabled();
     }
     var encryptionType = "AES-256";
     var storageEncryptionAvailable = source != null;

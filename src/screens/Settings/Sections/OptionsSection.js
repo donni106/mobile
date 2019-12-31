@@ -3,8 +3,8 @@ import {Alert} from 'react-native';
 import StyleKit from "@Style/StyleKit"
 import {TextInput, View, Text} from 'react-native';
 import UserPrefsManager from "@Lib/userPrefsManager"
-import KeysManager from "@Lib/keysManager"
-import Auth from '@SFJS/authManager'
+import KeyManager from "@Lib/snjs/keyManager"
+import Auth from '@SNJS/authManager'
 import SectionHeader from "@Components/SectionHeader";
 import ButtonCell from "@Components/ButtonCell";
 import TableSection from "@Components/TableSection";
@@ -21,8 +21,8 @@ class OptionsSection extends Abstract {
 
   constructor(props) {
     super(props);
-    let encryptionAvailable = KeysManager.get().activeKeys() != null;
-    let email = KeysManager.get().getUserEmail();
+    let encryptionAvailable = KeyManager.get().activeKeys() != null;
+    let email = KeyManager.get().getUserEmail();
     this.state = {
       loadingExport: false,
       encryptionAvailable: encryptionAvailable,

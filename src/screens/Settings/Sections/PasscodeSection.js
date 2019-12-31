@@ -11,7 +11,7 @@ import SectionedOptionsTableCell from "@Components/SectionedOptionsTableCell";
 
 import ApplicationState from "@Lib/ApplicationState"
 import FingerprintScanner from 'react-native-fingerprint-scanner';
-import KeysManager from "@Lib/keysManager"
+import KeyManager from "@Lib/snjs/keyManager"
 
 export default class PasscodeSection extends Component {
 
@@ -27,23 +27,23 @@ export default class PasscodeSection extends Component {
   }
 
   componentDidMount() {
-    KeysManager.getDeviceBiometricsAvailability((available, type, noun) => {
+    KeyManager.getDeviceBiometricsAvailability((available, type, noun) => {
       this.setState({fingerprintAvailable: available, biometricsType: type, biometricsNoun: noun})
     })
   }
 
   onPasscodeOptionPress = (option) => {
-    KeysManager.get().setPasscodeTiming(option.key);
+    KeyManager.get().setPasscodeTiming(option.key);
     this.forceUpdate();
   }
 
   onFingerprintOptionPress = (option) => {
-    KeysManager.get().setBiometricsTiming(option.key);
+    KeyManager.get().setBiometricsTiming(option.key);
     this.forceUpdate();
   }
 
   render() {
-    var source = KeysManager.get().encryptionSource();
+    var source = KeyManager.get().encryptionSource();
     var encryptionAvailable = source !== null;
 
     var storageEncryptionTitle = encryptionAvailable ? (this.props.storageEncryption ? "Disable Storage Encryption" : "Enable Storage Encryption") : "Storage Encryption";
@@ -69,8 +69,8 @@ export default class PasscodeSection extends Component {
     var fingerprintTitle = this.props.hasBiometrics ? `Disable ${biometricsNoun} Lock` : `Enable ${biometricsNoun} Lock`;
     var fingerprintOnPress = this.props.hasBiometrics ? this.props.onFingerprintDisable : this.props.onFingerprintEnable;
 
-    var passcodeOptions = KeysManager.get().getPasscodeTimingOptions();
-    var fingerprintOptions = KeysManager.get().getBiometricsTimingOptions();
+    var passcodeOptions = KeyManager.get().getPasscodeTimingOptions();
+    var fingerprintOptions = KeyManager.get().getBiometricsTimingOptions();
 
     if(!this.state.fingerprintAvailable) {
       fingerprintTitle = "Enable Fingerprint Lock (Not Available)"

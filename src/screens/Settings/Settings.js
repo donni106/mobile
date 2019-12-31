@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import {ScrollView, View, Alert, Keyboard, Platform} from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 
-import Sync from '@SFJS/syncManager'
-import ModelManager from '@SFJS/modelManager'
-import AlertManager from '@SFJS/alertManager'
-import SF from '@SFJS/sfjs'
-import Auth from '@SFJS/authManager'
-import Storage from "@SFJS/storageManager"
+import Sync from '@SNJS/syncManager'
+import ModelManager from '@SNJS/modelManager'
+import AlertManager from '@SNJS/alertManager'
+import RNProtocolManager from '@SNJS/protocolManager'
+import Auth from '@SNJS/authManager'
+import Storage from "@SNJS/storageManager"
 
-import KeysManager from '@Lib/keysManager'
+import KeyManager from '@Lib/snjs/keyManager'
 import OptionsState from "@Lib/OptionsState"
 import ApplicationState from "@Lib/ApplicationState"
 import StyleKit from "@Style/StyleKit"
@@ -59,7 +59,7 @@ export default class Settings extends Abstract {
           onPress: () => {
             Storage.get().clear();
             Auth.get().signout();
-            KeysManager.get().clearOfflineKeysAndData(true);
+            KeyManager.get().clearOfflineKeysAndData(true);
           }
         }
       })
@@ -82,9 +82,9 @@ export default class Settings extends Abstract {
   }
 
   loadSecurityStatus() {
-    var hasPasscode = KeysManager.get().hasOfflinePasscode();
-    var hasBiometrics = KeysManager.get().hasBiometrics();
-    var encryptedStorage = KeysManager.get().isStorageEncryptionEnabled();
+    var hasPasscode = KeyManager.get().hasOfflinePasscode();
+    var hasBiometrics = KeyManager.get().hasBiometrics();
+    var encryptedStorage = KeyManager.get().isStorageEncryptionEnabled();
     this.mergeState({hasPasscode: hasPasscode, hasBiometrics: hasBiometrics, storageEncryption: encryptedStorage})
   }
 
@@ -128,7 +128,7 @@ export default class Settings extends Abstract {
       confirmButtonText: "Enable",
       onConfirm: () => {
         this.mergeState({storageEncryptionLoading: true});
-        KeysManager.get().enableStorageEncryption();
+        KeyManager.get().enableStorageEncryption();
         this.resaveOfflineData(() => {
           this.mergeState({storageEncryption: true, storageEncryptionLoading: false});
         });
@@ -143,7 +143,7 @@ export default class Settings extends Abstract {
       confirmButtonText: "Disable",
       onConfirm: () => {
         this.mergeState({storageEncryptionLoading: true});
-        KeysManager.get().disableStorageEncryption();
+        KeyManager.get().disableStorageEncryption();
         this.resaveOfflineData(() => {
           this.mergeState({storageEncryption: false, storageEncryptionLoading: false});
         });
@@ -162,17 +162,17 @@ export default class Settings extends Abstract {
       onSubmit: async (value, keyboardType) => {
         Storage.get().setItem("passcodeKeyboardType", keyboardType);
 
-        let identifier = await SF.get().crypto.generateUUID();
+        let identifier = await RNProtocolManager.get().crypto.generateUUID();
 
-        SF.get().crypto.generateInitialKeysAndAuthParamsForUser(identifier, value).then((results) => {
+        RNProtocolManager.get().createRootKey({identifier, password: value}).then((results) => {
           let keys = results.keys;
           let authParams = results.authParams;
 
           // make sure it has valid items
           if(_.keys(keys).length > 0) {
-            KeysManager.get().setOfflineAuthParams(authParams);
-            KeysManager.get().persistOfflineKeys(keys);
-            var encryptionSource = KeysManager.get().encryptionSource();
+            KeyManager.get().setOfflineAuthParams(authParams);
+            KeyManager.get().persistOfflineKeys(keys);
+            var encryptionSource = KeyManager.get().encryptionSource();
             if(encryptionSource == "offline") {
               this.resaveOfflineData(null, true);
             }
@@ -187,7 +187,7 @@ export default class Settings extends Abstract {
 
   onPasscodeDisable = () => {
     this.handlePrivilegedAction(true, SFPrivilegesManager.ActionManagePasscode, () => {
-      var encryptionSource = KeysManager.get().encryptionSource();
+      var encryptionSource = KeyManager.get().encryptionSource();
       var message;
       if(encryptionSource == "account") {
         message = "Are you sure you want to disable your local passcode? This will not affect your encryption status, as your data is currently being encrypted through your sync account keys.";
@@ -200,7 +200,7 @@ export default class Settings extends Abstract {
         text: message,
         confirmButtonText: "Disable Passcode",
         onConfirm: async () => {
-          var result = await KeysManager.get().clearOfflineKeysAndData();
+          var result = await KeyManager.get().clearOfflineKeysAndData();
           if(encryptionSource == "offline") {
             // remove encryption from all items
             this.resaveOfflineData(null, true);
@@ -214,13 +214,13 @@ export default class Settings extends Abstract {
   }
 
   onFingerprintEnable = () => {
-    KeysManager.get().enableBiometrics();
+    KeyManager.get().enableBiometrics();
     this.loadSecurityStatus();
   }
 
   onFingerprintDisable = () => {
     this.handlePrivilegedAction(true, SFPrivilegesManager.ActionManagePasscode, () => {
-      KeysManager.get().disableBiometrics();
+      KeyManager.get().disableBiometrics();
       this.loadSecurityStatus();
     });
   }

@@ -4,8 +4,8 @@ import ModelManager from './modelManager'
 import Storage from './storageManager'
 import AlertManager from './alertManager'
 
-import Auth from '@SFJS/authManager'
-import KeysManager from '@Lib/keysManager'
+import Auth from '@SNJS/authManager'
+import KeyManager from '@Lib/snjs/keyManager'
 
 export default class Sync extends SFSyncManager {
 
@@ -21,27 +21,22 @@ export default class Sync extends SFSyncManager {
 
   constructor() {
     super(ModelManager.get(), Storage.get(), Server.get());
-    KeysManager.get().registerAccountRelatedStorageKeys(["syncToken", "cursorToken"]);
+    KeyManager.get().registerAccountRelatedStorageKeys(["syncToken", "cursorToken"]);
 
     this.setKeyRequestHandler((request) => {
       var keys;
       if(request == SFSyncManager.KeyRequestLoadSaveAccount || request == SFSyncManager.KeyRequestLoadLocal) {
-        keys = KeysManager.get().activeKeys();
+        keys = KeyManager.get().activeKeys();
       } else if(request == SFSyncManager.KeyRequestSaveLocal) {
         // Only return keys when saving local if storage encryption is enabled.
-        keys = KeysManager.get().isStorageEncryptionEnabled() && KeysManager.get().activeKeys();
+        keys = KeyManager.get().isStorageEncryptionEnabled() && KeyManager.get().activeKeys();
       }
 
-      let auth_params = KeysManager.get().activeAuthParams();
+      let keyParams = KeyManager.get().getRootKeyParams();
       let offline = Auth.get().offline();
 
-      return {keys, auth_params, offline}
+      return {keys, keyParams, offline}
     })
-
-    // Content types appearing first are always mapped first
-    this.contentTypeLoadPriority = [
-      "SN|UserPreferences", "SN|Privileges",
-      "SN|Component", "SN|Theme"];
   }
 
   async resaveOfflineData() {

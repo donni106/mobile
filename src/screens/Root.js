@@ -2,11 +2,11 @@ import React, { Component, Platform } from 'react';
 import { TouchableHighlight, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import StyleKit from "@Style/StyleKit"
-import Sync from '@SFJS/syncManager'
-import Auth from '@SFJS/authManager'
-import KeysManager from '@Lib/keysManager'
-import ModelManager from "@SFJS/modelManager"
-import AlertManager from '@SFJS/alertManager'
+import Sync from '@SNJS/syncManager'
+import Auth from '@SNJS/authManager'
+import KeyManager from '@Lib/snjs/keyManager'
+import ModelManager from "@SNJS/modelManager"
+import AlertManager from '@SNJS/alertManager'
 
 import Abstract from "@Screens/Abstract"
 import LockedView from "@Containers/LockedView";
@@ -205,7 +205,7 @@ export default class Root extends Abstract {
   }
 
   initializeData() {
-    let encryptionEnabled = KeysManager.get().isOfflineEncryptionEnabled();
+    let encryptionEnabled = KeyManager.get().isOfflineEncryptionEnabled();
     this.setSubTitle(encryptionEnabled ? "Decrypting items..." : "Loading items...");
     let incrementalCallback = (current, total) => {
       let notesString = `${current}/${total} items...`

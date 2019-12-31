@@ -1,13 +1,14 @@
 import { Share, Alert } from 'react-native';
-import Storage from '@SFJS/storageManager'
-import Auth from '@SFJS/authManager'
-import KeysManager from '@Lib/keysManager'
-import AlertManager from "@SFJS/alertManager";
+import Storage from '@SNJS/storageManager'
+import Auth from '@SNJS/authManager'
+import KeyManager from '@Lib/snjs/keyManager'
+import AlertManager from "@SNJS/alertManager";
 import UserPrefsManager from '@Lib/userPrefsManager'
-import ModelManager from '@SFJS/modelManager'
+import ModelManager from '@SNJS/modelManager'
 import ApplicationState from "@Lib/ApplicationState"
 import RNFS from 'react-native-fs';
 import FileViewer from 'react-native-file-viewer';
+import RNProtocolManager from '@SNJS/protocolManager';
 
 const Mailer = require('NativeModules').RNMail;
 const base64 = require('base-64');
@@ -32,15 +33,19 @@ export default class BackupsManager {
    */
 
   async export(encrypted) {
-    var auth_params = await Auth.get().getAuthParams();
-    var keys = encrypted ? KeysManager.get().activeKeys() : null;
+    var keyParams = await Auth.get().getAuthParams();
+    var keys = encrypted ? KeyManager.get().activeKeys() : null;
 
     var items = [];
 
     for(var item of ModelManager.get().allItems) {
-      var itemParams = new SFItemParams(item, keys, auth_params);
-      var params = await itemParams.paramsForExportFile();
-      items.push(params);
+      const itemParams = await RNProtocolManager.get().generateExportParameters({
+        item: item,
+        keys: keys,
+        keyParams: keyParams,
+        exportType: SNProtocolOperator.ExportTypeFile
+      })
+      items.push(itemParams);
     }
 
     if(items.length == 0) {
@@ -51,9 +56,9 @@ export default class BackupsManager {
     var data = {items: items}
 
     if(keys) {
-      var authParams = KeysManager.get().activeAuthParams();
+      var keyParams = KeyManager.get().getRootKeyParams();
       // auth params are only needed when encrypted with a standard file key
-      data["auth_params"] = authParams;
+      data["keyParams"] = keyParams;
     }
 
     var jsonString = JSON.stringify(data, null, 2 /* pretty print */);

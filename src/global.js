@@ -18,18 +18,20 @@ import {
   SFItem,
   SFModelManager,
   SFSyncManager,
-  SFItemParams,
   SFAlertManager,
   SFStorageManager,
   SFHttpManager,
   SFAuthManager,
-  SFPrivilegesManager
-} from 'standard-file-js';
+  SFPrivilegesManager,
+  SNNote,
+  SNTag,
+  SNTheme,
+  SNComponent,
+  SNComponentManager
+} from 'snjs';
 
-SFItem.AppDomain = "org.standardnotes.sn";
-
+global.SNProtocolManager = SNProtocolManager;
 global.SFItem = SFItem;
-global.SFItemParams = SFItemParams;
 global.SFModelManager = SFModelManager;
 global.SFSyncManager = SFSyncManager;
 global.SFAlertManager = SFAlertManager;
@@ -38,19 +40,10 @@ global.SFHttpManager = SFHttpManager;
 global.SFAuthManager = SFAuthManager;
 global.SFPrivilegesManager = SFPrivilegesManager;
 
-import SF from "./lib/sfjs/sfjs"
-global.SFJS = SF.get();
-
-import {
-  SNNote,
-  SNTag,
-  SNTheme,
-  SNComponent,
-  SNComponentManager
-} from 'snjs';
-
 global.SNNote = SNNote;
 global.SNTag = SNTag;
 global.SNTheme = SNTheme;
 global.SNComponent = SNComponent;
 global.SNComponentManager = SNComponentManager;
+
+SFItem.AppDomain = "org.standardnotes.sn";

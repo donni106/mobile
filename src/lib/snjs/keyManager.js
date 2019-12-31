@@ -2,10 +2,10 @@ import {Platform} from 'react-native';
 import FlagSecure from 'react-native-flag-secure-android';
 import FingerprintScanner from 'react-native-fingerprint-scanner';
 
-import SF from './sfjs/sfjs'
+import RNProtocolManager from '@SNJS/protocolManager';
 import ModelManager from './sfjs/modelManager'
 import Storage from './sfjs/storageManager'
-import AlertManager from "@SFJS/alertManager"
+import AlertManager from "@SNJS/alertManager"
 import Keychain from "./keychain"
 import SNReactNative from 'standard-notes-rn';
 
@@ -15,13 +15,13 @@ let BiometricsPrefs = "biometrics_prefs";
 let FirstRunKey = "first_run";
 let StorageEncryptionKey = "storage_encryption";
 
-export default class KeysManager {
+export default class KeyManager extends SNKeyManager {
 
   static instance = null;
 
   static get() {
     if (this.instance == null) {
-      this.instance = new KeysManager();
+      this.instance = new KeyManager();
     }
 
     return this.instance;
@@ -29,7 +29,7 @@ export default class KeysManager {
 
   constructor() {
     this.biometricPrefs = {};
-    this.accountRelatedStorageKeys = ["auth_params", "user"];
+    this.accountRelatedStorageKeys = ["keyParams", "user"];
   }
 
   async runPendingMigrations() {
@@ -83,7 +83,6 @@ export default class KeysManager {
     let storageKeys = [
       "auth_params",
       "user",
-      OfflineParamsKey,
       EncryptedAccountKeysKey,
       FirstRunKey,
       StorageEncryptionKey,
@@ -111,25 +110,14 @@ export default class KeysManager {
         this.missingFirstRunKey = items[FirstRunKey] === null || items[FirstRunKey] === undefined;
 
         // auth params
-        var authParams = items.auth_params;
-        if(authParams) {
-          this.accountAuthParams = JSON.parse(authParams);
+        var keyParams = items.auth_params;
+        if(keyParams) {
+          this.accountAuthParams = JSON.parse(keyParams);
         }
 
         let biometricPrefs = items[BiometricsPrefs];
         if(biometricPrefs) {
           this.biometricPrefs = JSON.parse(biometricPrefs);
-        }
-
-        // offline params
-        var pcParams = items[OfflineParamsKey];
-        if(pcParams) {
-          this.offlineAuthParams = JSON.parse(pcParams);
-        }
-
-        let encryptedAccountKeys = items[EncryptedAccountKeysKey];
-        if(encryptedAccountKeys) {
-          this.encryptedAccountKeys = JSON.parse(encryptedAccountKeys);
         }
 
         // storage encryption
@@ -273,7 +261,7 @@ export default class KeysManager {
     }
 
     if(this.offlineKeys) {
-      _.merge(value, {offline: {pw: this.offlineKeys.pw, timing: this.passcodeTiming}});
+      _.merge(value, {offline: {pw: this.offlineKeys.serverAuthenticationValue, timing: this.passcodeTiming}});
     }
 
     return value;
@@ -287,12 +275,17 @@ export default class KeysManager {
       // If offline local passcode keys are available, use that to encrypt account keys
       // Don't encrypt offline pw because then we don't be able to verify passcode
       var encryptedKeys = new SFItem();
-      encryptedKeys.uuid = await SF.get().crypto.generateUUID();
+      encryptedKeys.uuid = await RNProtocolManager.get().crypto.generateUUID();
       encryptedKeys.content_type = "SN|Mobile|EncryptedKeys"
       encryptedKeys.content.accountKeys = this.accountKeys;
-      var params = new SFItemParams(encryptedKeys, this.offlineKeys, this.offlineAuthParams);
-      let results = await params.paramsForSync();
-      await Storage.get().setItem(EncryptedAccountKeysKey, JSON.stringify(results));
+      const itemParams = await RNProtocolManager.get().generateExportParameters({
+        item: encryptedKeys,
+        keys: this.offlineKeys,
+        authParams: this.offlineAuthParams,
+        exportType: SNProtocolOperator.ExportTypeSync
+      })
+
+      await Storage.get().setItem(EncryptedAccountKeysKey, JSON.stringify(itemParams));
     } else {
       await Storage.get().removeItem(EncryptedAccountKeysKey);
     }
@@ -337,18 +330,18 @@ export default class KeysManager {
   }
 
   hasAccountKeys() {
-    return this.accountKeys && this.accountKeys.mk != null;
+    return this.accountKeys && this.accountKeys.masterKey != null;
   }
 
   isOfflineEncryptionEnabled() {
     var keys = this.activeKeys();
-    return keys && keys.mk !== null && this.isStorageEncryptionEnabled();
+    return keys && keys.masterKey !== null && this.isStorageEncryptionEnabled();
   }
 
   encryptionSource() {
-    if(this.accountKeys && this.accountKeys.mk !== null) {
+    if(this.accountKeys && this.accountKeys.masterKey !== null) {
       return "account";
-    } else if(this.offlineKeys && this.offlineKeys.mk !== null) {
+    } else if(this.offlineKeys && this.offlineKeys.masterKey !== null) {
       return "offline";
     } else {
       return null;
@@ -419,15 +412,10 @@ export default class KeysManager {
   }
 
   defaultProtocolVersionForKeys(keys) {
-    if(keys && keys.ak) {
-      // If there's no version stored, and there's an ak, it has to be 002. Newer versions would have thier version stored in authParams.
-      return "002";
-    } else {
-      return "001";
-    }
+    return keys.version;
   }
 
-  activeAuthParams() {
+  getRootKeyParams() {
     if(this.accountKeys) {
       var params = this.accountAuthParams;
       if(params && !params.version) {
@@ -457,7 +445,7 @@ export default class KeysManager {
 
   async clearOfflineKeysAndData(force = false) {
     // make sure user is authenticated before performing this step
-    if(this.offlineKeys && !this.offlineKeys.mk && !force) {
+    if(this.offlineKeys && !this.offlineKeys.masterKey && !force) {
       alert("Unable to remove passcode. Make sure you are properly authenticated and try again.");
       return false;
     }
@@ -482,8 +470,8 @@ export default class KeysManager {
     // Check to see if encryptedAccountKeys need decrypting
     if(this.encryptedAccountKeys) {
       // Decrypt and set
-      await SFJS.itemTransformer.decryptItem(this.encryptedAccountKeys, this.offlineKeys);
-      // itemTransformer modifies in place. this.encryptedAccountKeys should now be decrypted
+      await RNProtocolManager.get().decryptItem({item: this.encryptedAccountKeys, keys: this.offlineKeys});
+      // decryptItem modifies in place. this.encryptedAccountKeys should now be decrypted
       let decryptedKeys = new SFItem(this.encryptedAccountKeys);
       if(decryptedKeys.errorDecrypting) {
         console.error("Fatal: Error decrypting account keys");
@@ -496,11 +484,11 @@ export default class KeysManager {
   }
 
   offlinePasscodeHash() {
-    return this.offlineKeys ? this.offlineKeys.pw : null;
+    return this.offlineKeys ? this.offlineKeys.serverAuthenticationValue : null;
   }
 
   hasOfflinePasscode() {
-    return this.offlineKeys && this.offlineKeys.pw !== null;
+    return this.offlineKeys && this.offlineKeys.serverAuthenticationValue !== null;
   }
 
   hasBiometrics() {

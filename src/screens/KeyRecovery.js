@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import { TextInput, View, Text, Platform, Alert, SafeAreaView } from 'react-native';
 import StyleKit from "@Style/StyleKit"
-import SF from '@SFJS/sfjs'
-import KeysManager from "@Lib/keysManager"
-import ModelManager from "@SFJS/modelManager"
-import Sync from "@SFJS/syncManager"
+import RNProtocolManager from '@SNJS/protocolManager'
+import KeyManager from "@Lib/snjs/keyManager"
+import ModelManager from "@SNJS/modelManager"
+import Sync from "@SNJS/syncManager"
 import TableSection from "@Components/TableSection";
 import SectionedTableCell from "@Components/SectionedTableCell";
 import SectionHeader from "@Components/SectionHeader";
 import ButtonCell from "@Components/ButtonCell";
 import Abstract from "@Screens/Abstract"
 import ApplicationState from "@Lib/ApplicationState"
-import AlertManager from "@SFJS/alertManager"
+import AlertManager from "@SNJS/alertManager"
 
 export default class KeyRecovery extends Abstract {
 
@@ -59,9 +59,9 @@ export default class KeyRecovery extends Abstract {
   }
 
   submit = async () => {
-    let authParams = KeysManager.get().offlineAuthParams;
-    let keys = await SF.get().crypto.computeEncryptionKeysForUser(this.state.text, authParams);
-    await SFJS.itemTransformer.decryptMultipleItems(this.items, keys);
+    let authParams = KeyManager.get().offlineAuthParams;
+    let keys = await RNProtocolManager.get().computeRootKey({password: this.state.text, authParams});
+    await RNProtocolManager.get().decryptMultipleItems(this.items, keys);
 
     this.encryptedCount = 0;
     for(var item of this.items) {
@@ -72,7 +72,7 @@ export default class KeyRecovery extends Abstract {
 
     let useKeys = async (confirm) => {
       let run = async () => {
-        await KeysManager.get().persistOfflineKeys(keys);
+        await KeyManager.get().persistOfflineKeys(keys);
         await ModelManager.get().mapResponseItemsToLocalModelsOmittingFields(this.items, null, SFModelManager.MappingSourceLocalRetrieved);
         await Sync.get().writeItemsToLocalStorage(this.items);
         this.dismiss();

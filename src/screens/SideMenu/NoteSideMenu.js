@@ -15,9 +15,9 @@ import ItemActionManager from "@Lib/itemActionManager"
 
 import StyleKit from "@Style/StyleKit"
 import ActionSheetWrapper from "@Style/ActionSheetWrapper"
-import ModelManager from '@SFJS/modelManager'
-import Sync from '@SFJS/syncManager'
-import PrivilegesManager from "@SFJS/privilegesManager"
+import ModelManager from '@SNJS/modelManager'
+import Sync from '@SNJS/syncManager'
+import PrivilegesManager from "@SNJS/privilegesManager"
 
 import SideMenuManager from "@SideMenu/SideMenuManager"
 import SideMenuCell from "@SideMenu/SideMenuCell"

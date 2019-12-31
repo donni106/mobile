@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { View, Text, Alert } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 
-import ModelManager from '@SFJS/modelManager'
-import Storage from '@SFJS/storageManager'
-import Sync from '@SFJS/syncManager'
-import AlertManager from '@SFJS/alertManager'
+import ModelManager from '@SNJS/modelManager'
+import Storage from '@SNJS/storageManager'
+import Sync from '@SNJS/syncManager'
+import AlertManager from '@SNJS/alertManager'
 
-import Auth from '@SFJS/authManager'
-import KeysManager from '@Lib/keysManager'
+import Auth from '@SNJS/authManager'
+import KeyManager from '@Lib/snjs/keyManager'
 import Keychain from "@Lib/keychain"
 import ItemActionManager from '@Lib/itemActionManager'
 
@@ -47,7 +47,7 @@ export default class Notes extends Abstract {
   loadInitialState() {
     // We may be here on non-launch state, where local data will already have been loaded.
     let initialDataLoaded = Sync.get().initialDataLoaded();
-    let encryptionEnabled = KeysManager.get().isOfflineEncryptionEnabled();
+    let encryptionEnabled = KeyManager.get().isOfflineEncryptionEnabled();
     this.mergeState({
       refreshing: false,
       decrypting: !initialDataLoaded && encryptionEnabled,
@@ -245,12 +245,12 @@ export default class Notes extends Abstract {
    */
   displayNeedSignInAlertForLocalItemsIfApplicable(items) {
 
-    if(KeysManager.get().shouldPresentKeyRecoveryWizard()) {
+    if(KeyManager.get().shouldPresentKeyRecoveryWizard()) {
       this.props.navigation.navigate("KeyRecovery");
       return;
     }
 
-    if(!items || KeysManager.get().hasAccountKeys()) {
+    if(!items || KeyManager.get().hasAccountKeys()) {
       return;
     }
 

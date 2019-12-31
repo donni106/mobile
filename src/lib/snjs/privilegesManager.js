@@ -1,13 +1,13 @@
 import {Platform} from 'react-native'
 import ModelManager from "./modelManager";
 import Sync from "./syncManager";
-import { SFPrivilegesManager, SFSingletonManager } from "standard-file-js";
+import { SFPrivilegesManager, SFSingletonManager } from "snjs";
 import AuthenticationSourceAccountPassword from "@Screens/Authentication/Sources/AuthenticationSourceAccountPassword";
 import AuthenticationSourceLocalPasscode from "@Screens/Authentication/Sources/AuthenticationSourceLocalPasscode";
 import AuthenticationSourceBiometric from "@Screens/Authentication/Sources/AuthenticationSourceBiometric";
-import KeysManager from "@Lib/keysManager"
-import Storage from "@SFJS/storageManager"
-import Auth from "@SFJS/authManager"
+import KeyManager from "@Lib/snjs/keyManager"
+import Storage from "@SNJS/storageManager"
+import Auth from "@SNJS/authManager"
 import StyleKit from "@Style/StyleKit"
 
 export default class PrivilegesManager extends SFPrivilegesManager {
@@ -31,8 +31,8 @@ export default class PrivilegesManager extends SFPrivilegesManager {
         return Auth.get().offline();
       },
       hasLocalPasscode: async () => {
-        let hasPasscode = KeysManager.get().hasOfflinePasscode();
-        let hasBiometrics = KeysManager.get().hasBiometrics();
+        let hasPasscode = KeyManager.get().hasOfflinePasscode();
+        let hasBiometrics = KeyManager.get().hasBiometrics();
         return hasPasscode || hasBiometrics;
       },
       saveToStorage: async (key, value) => {
@@ -95,8 +95,8 @@ export default class PrivilegesManager extends SFPrivilegesManager {
       if(credential == SFPrivilegesManager.CredentialAccountPassword) {
         return [new AuthenticationSourceAccountPassword()];
       } else if(credential == SFPrivilegesManager.CredentialLocalPasscode) {
-        var hasPasscode = KeysManager.get().hasOfflinePasscode();
-        var hasBiometrics = KeysManager.get().hasBiometrics();
+        var hasPasscode = KeyManager.get().hasOfflinePasscode();
+        var hasBiometrics = KeyManager.get().hasBiometrics();
         let sources = [];
         if(hasPasscode) {sources.push(new AuthenticationSourceLocalPasscode());}
         if(hasBiometrics) {sources.push(new AuthenticationSourceBiometric());}

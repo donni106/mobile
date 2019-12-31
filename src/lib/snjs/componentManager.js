@@ -1,32 +1,26 @@
-import ModelManager from "@SFJS/modelManager";
-import Sync from "@SFJS/syncManager";
-import AlertManager from "@SFJS/alertManager";
+import ModelManager from "@SNJS/modelManager";
+import Sync from "@SNJS/syncManager";
+import AlertManager from "@SNJS/alertManager";
 import { Platform } from 'react-native';
 import StyleKit from "@Style/StyleKit"
 
 export default class ComponentManager extends SNComponentManager {
 
-  static instance = null;
-
-  static get() {
-    if (this.instance == null) {
-      this.instance = new ComponentManager({
-        modelManager: ModelManager.get(),
-        syncManager: Sync.get(),
-        alertManager: AlertManager.get(),
-        environment: "mobile",
-        platform: Platform.OS
-      });
-    }
-
-    return this.instance;
-  }
-
-  constructor({modelManager, syncManager, desktopManager, nativeExtManager,
-    alertManager, $uiRunner, platform, environment}) {
-    super({modelManager, syncManager, desktopManager, nativeExtManager,
-      alertManager, $uiRunner, platform, environment});
-  }
+  // static instance = null;
+  //
+  // static get() {
+  //   if (this.instance == null) {
+  //     this.instance = new ComponentManager({
+  //       modelManager: ModelManager.get(),
+  //       syncManager: Sync.get(),
+  //       alertManager: AlertManager.get(),
+  //       environment: "mobile",
+  //       platform: Platform.OS
+  //     });
+  //   }
+  //
+  //   return this.instance;
+  // }
 
   /*
     Overrides

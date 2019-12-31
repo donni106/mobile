@@ -1,4 +1,4 @@
-import Storage from "@SFJS/storageManager"
+import Storage from "@SNJS/storageManager"
 
 export default class OptionsState {
 

@@ -10,9 +10,9 @@ import ButtonCell from "@Components/ButtonCell";
 import Abstract from "@Screens/Abstract"
 import LockedView from "@Containers/LockedView";
 import ApplicationState from "@Lib/ApplicationState"
-import Auth from "@SFJS/authManager"
-import KeysManager from "@Lib/keysManager"
-import PrivilegesManager from "@SFJS/privilegesManager"
+import Auth from "@SNJS/authManager"
+import KeyManager from "@Lib/snjs/keyManager"
+import PrivilegesManager from "@SNJS/privilegesManager"
 
 export default class ManagePrivileges extends Abstract {
 
@@ -45,7 +45,7 @@ export default class ManagePrivileges extends Abstract {
       }
     })
 
-    this.hasPasscode = KeysManager.get().hasOfflinePasscode();
+    this.hasPasscode = KeyManager.get().hasOfflinePasscode();
     this.hasAccount = !Auth.get().offline();
 
     this.reloadPrivileges();
@@ -78,7 +78,7 @@ export default class ManagePrivileges extends Abstract {
     let availableActions = PrivilegesManager.get().getAvailableActions();
 
     let notConfiguredCredentials = [];
-    let hasLocalAuth = KeysManager.get().hasOfflinePasscode() || KeysManager.get().hasBiometrics();
+    let hasLocalAuth = KeyManager.get().hasOfflinePasscode() || KeyManager.get().hasBiometrics();
     let offline = Auth.get().offline();
     for(let credential of availableCredentials) {
       if(credential == PrivilegesManager.CredentialLocalPasscode && !hasLocalAuth) {

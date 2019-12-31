@@ -1,7 +1,7 @@
-import SF from '@SFJS/sfjs'
-import Storage from '@SFJS/storageManager'
-import Auth from '@SFJS/authManager'
-import KeysManager from '@Lib/keysManager'
+import RNProtocolManager from '@SNJS/protocolManager'
+import Storage from '@SNJS/storageManager'
+import Auth from '@SNJS/authManager'
+import KeyManager from '@Lib/snjs/keyManager'
 import AuthenticationSource from "./AuthenticationSource"
 
 export default class AuthenticationSourceAccountPassword extends AuthenticationSource {

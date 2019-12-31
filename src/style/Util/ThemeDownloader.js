@@ -1,6 +1,6 @@
 import { StyleSheet, StatusBar, Alert, Platform, Dimensions } from 'react-native';
 
-import Server from "@SFJS/httpManager"
+import Server from "@SNJS/httpManager"
 import CSSParser from "@Style/Util/CSSParser";
 
 export default class ThemeDownloader {

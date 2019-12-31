@@ -1,4 +1,4 @@
-import KeysManager from '@Lib/keysManager'
+import KeyManager from '@Lib/snjs/keyManager'
 
 export default class Server extends SFHttpManager {
 
@@ -16,7 +16,7 @@ export default class Server extends SFHttpManager {
     super();
 
     this.setJWTRequestHandler(async () => {
-      return KeysManager.get().jwt();
+      return KeyManager.get().jwt();
     })
   }
 }

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Auth from "@SFJS/authManager"
-import KeysManager from "@Lib/keysManager"
-import ModelManager from "@SFJS/modelManager"
+import Auth from "@SNJS/authManager"
+import KeyManager from "@Lib/snjs/keyManager"
+import ModelManager from "@SNJS/modelManager"
 
 import StyleKit from "@Style/StyleKit"
 import ThemedComponent from "@Components/ThemedComponent";
@@ -14,7 +14,7 @@ export default class SideMenuHero extends ThemedComponent {
 
   getText() {
     let offline = Auth.get().offline();
-    let hasEncryption = !offline || KeysManager.get().isStorageEncryptionEnabled();
+    let hasEncryption = !offline || KeyManager.get().isStorageEncryptionEnabled();
     if(offline) {
       return {
         title: "Data Not Backed Up",
@@ -23,7 +23,7 @@ export default class SideMenuHero extends ThemedComponent {
           "Sign in or register to add encryption and enable sync to your other devices."
       }
     } else {
-      let email = KeysManager.get().getUserEmail();
+      let email = KeyManager.get().getUserEmail();
       var items = ModelManager.get().allItemsMatchingTypes(["Note", "Tag"]);
       var itemsStatus = items.length + "/" + items.length + " notes and tags encrypted";
       return {

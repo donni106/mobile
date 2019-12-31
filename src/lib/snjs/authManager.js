@@ -1,8 +1,8 @@
 import {Platform} from 'react-native';
-import KeysManager from "@Lib/keysManager"
-import Storage from '@SFJS/storageManager'
-import Server from '@SFJS/httpManager'
-import AlertManager from '@SFJS/alertManager'
+import KeyManager from "@Lib/snjs/keyManager"
+import Storage from '@SNJS/storageManager'
+import Server from '@SNJS/httpManager'
+import AlertManager from '@SNJS/alertManager'
 
 export default class Auth extends SFAuthManager {
 
@@ -27,18 +27,18 @@ export default class Auth extends SFAuthManager {
   }
 
   serverUrl() {
-    let user = KeysManager.get().user;
+    let user = KeyManager.get().user;
     return (user && user.server) || this.defaultServer();
   }
 
   offline() {
-    let keys = KeysManager.get().activeKeys() || {};
+    let keys = KeyManager.get().activeKeys() || {};
     return !keys.jwt;
   }
 
   async signout(clearAllData) {
     await Storage.get().clearAllModels();
-    await KeysManager.get().clearAccountKeysAndData();
+    await KeyManager.get().clearAccountKeysAndData();
     this._keys = null;
     // DONT clear all data. We will do this ourselves manually, as we need to preserve certain data keys.
     return super.signout(false);
@@ -46,17 +46,17 @@ export default class Auth extends SFAuthManager {
 
   async keys() {
     // AuthManager only handles account related keys. If we are requesting keys,
-    // we are referring to account keys. KeysManager.activeKeys can return local passcode
+    // we are referring to account keys. KeyManager.activeKeys can return local passcode
     // keys.
     if(this.offline()) {
       return null;
     }
 
-    return KeysManager.get().activeKeys();
+    return KeyManager.get().activeKeys();
   }
 
   async getAuthParams() {
-    return KeysManager.get().activeAuthParams();
+    return KeyManager.get().getRootKeyParams();
   }
 
   async handleAuthResponse(response, email, url, authParams, keys) {
@@ -66,9 +66,9 @@ export default class Auth extends SFAuthManager {
     try {
       this._keys = keys;
       return Promise.all([
-        KeysManager.get().persistAccountKeys(_.merge(keys, {jwt: response.token})),
-        KeysManager.get().setAccountAuthParams(authParams),
-        KeysManager.get().saveUser({server: url, email: email})
+        KeyManager.get().persistAccountKeys(_.merge(keys, {jwt: response.token})),
+        KeyManager.get().setAccountAuthParams(authParams),
+        KeyManager.get().saveUser({server: url, email: email})
       ]);
     } catch(e) {
       console.log("Error saving auth paramters", e);
@@ -77,9 +77,10 @@ export default class Auth extends SFAuthManager {
   }
 
   async verifyAccountPassword(password) {
-    let authParams = await this.getAuthParams();
-    let keys = await SFJS.crypto.computeEncryptionKeysForUser(password, authParams);
-    let success = keys.mk === (await this.keys()).mk;
+    const authParams = await this.getAuthParams();
+    const keys = await RNProtocolManager.get().computeRootKey({password, authParams});
+    const currentKeys = await this.keys();
+    const success = await RNProtocolManager.get().compareKeys(keys, currentKeys);
     return success;
   }
 }
